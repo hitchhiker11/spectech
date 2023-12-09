@@ -1,0 +1,219 @@
+<?php  
+if(isset($_SESSION['userRole']) && $_SESSION['userRole'] !== 'superAdmin' && $_SESSION['userRole'] !== 'admin'):
+  include  $_SERVER['DOCUMENT_ROOT'].'/views/404.php';
+  return;
+endif;
+ include  $_SERVER['DOCUMENT_ROOT'].'/views/components/header.phtml'; ?>
+<!-- / Navbar -->
+
+      
+
+      <!-- Content wrapper -->
+      <div class="content-wrapper">
+
+        <!-- Content -->
+        
+          <div class="container-xxl flex-grow-1 container-p-y">
+            
+            
+<h4 class="fw-bold py-3 mb-4">
+  <span class="text-muted fw-light">Водители /</span> Детали Транспортного Средства
+</h4>
+<form autocomplete="off" id="editVehicle">
+<div class="row">
+  <div class="col-md-12">
+    <div class="card p-5">
+      <?php if(isset($_GET['s']) && $_GET['s'] === 'u'): ?>
+        <span class="p-1" id="errDiv"><span style="color:green"> Транспортное Средство успешно обновлено!</span></span>
+      <?php else: ?>
+        <span class="p-1" id="errDiv"></span>
+      <?php endif ?>
+      <div class="card-body">
+        <div class="d-flex align-items-start align-items-sm-center gap-4">
+          <img src="/uploads/vehicles/<?php echo $vehicle['data']['photo'];?>" alt="user-avatar" class="d-block rounded" height="100" width="100" id="uploadedAvatar" />
+          <div class="button-wrapper">
+            <label for="upload" class="btn btn-primary me-2 mb-4" tabindex="0">
+              <span class="d-none d-sm-block">Загрузить фото</span>
+              <i class="bx bx-upload d-block d-sm-none"></i>
+              <input name="photo" type="file" id="upload" class="account-file-input" hidden accept="image/png, image/jpeg" />
+            </label>
+            <button type="button" class="btn btn-outline-secondary account-image-reset mb-4">
+              <i class="bx bx-reset d-block d-sm-none"></i>
+              <span class="d-none d-sm-block">Сбросить</span>
+            </button>
+
+            <p class="text-muted mb-0">Разрешены форматы JPG, GIF или PNG. Максимальный размер 800K</p>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col mb-3">
+          <label for="model" class="form-label">МОДЕЛЬ ТРАНСПОРТНОГО СРЕДСТВА</label>
+          <input type="text" name="model" id="model" value="<?php echo $vehicle['data']['model'];?>" class="form-control" placeholder="">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col mb-3">
+          <label for="color" class="form-label">ЦВЕТ ТРАНСПОРТНОГО СРЕДСТВА</label>
+          <input type="text" name="color" id="color" value="<?php echo $vehicle['data']['color'];?>" class="form-control" placeholder="">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col mb-3">
+          <label for="vtype" class="form-label">ТИП</label>
+          <input type="text" name="type" id="vtype" value="<?php echo $vehicle['data']['vtype'];?>" class="form-control" placeholder="">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col mb-3">
+          <label for="regisNumber" class="form-label">регистрационный номер</label>
+          <input type="text" name="regisNo" id="regisNumber" value="<?php echo $vehicle['data']['regisNumber'];?>" class="form-control" placeholder="">
+        </div>
+      </div>
+
+
+      <div class="row g-2 mb-3">
+        <div class="col mb-0">
+          <label for="engine" class="form-label">НОМЕР ДВИГАТЕЛЯ</label>
+          <input type="text" name="engine" value="<?php echo $vehicle['data']['engineNo'];?>" id="engine" class="form-control" placeholder="" required>
+        </div>
+        <div class="col mb-0">
+          <label for="trans" class="form-label">ТРАНСМИССИЯ</label>
+          <input type="text" name="trans" value="<?php echo $vehicle['data']['trans'];?>" id="trans" class="form-control" placeholder="" required>
+        </div>
+      </div>
+
+      <div class="row g-2 mb-3">
+        <div class="col mb-0">
+          <label for="axle" class="form-label">ОСЬ</label>
+          <input type="text" name="axle" value="<?php echo $vehicle['data']['axle'];?>" id="axle" class="form-control" placeholder="" required>
+        </div>
+        <div class="col mb-0">
+          <label for="paint" class="form-label">ОКРАС</label>
+          <input type="text" name="paint" value="<?php echo $vehicle['data']['paint'];?>" id="paint" class="form-control" placeholder="" required>
+        </div>
+      </div>
+
+      <div class="row g-2 mb-3">
+        <div class="col mb-0">
+          <label for="trim" class="form-label">Ремонты?</label>
+          <input type="text" name="trim" value="<?php echo $vehicle['data']['trim'];?>" id="trim" class="form-control" placeholder="" required>
+        </div>
+        <div class="col mb-0">
+          <label for="chasis" class="form-label">VIN номер</label>
+          <input type="text" name="chasis" value="<?php echo $vehicle['data']['chasis'];?>" id="chasis" class="form-control" placeholder="" required>
+        </div>
+      </div>
+
+      <div class="col-md mb-3">
+        <div class="form-check mt-3">
+          <input name="convertedRadio" class="form-check-input" type="radio" value="converted" <?php echo $vehicle['data']['converted'] !== 'unconverted' ? 'checked' : '' ?> id="convertedRadio1">
+          <label class="form-check-label" for="convertedRadio1">
+            Переделано
+          </label>
+        </div>
+        <div class="form-check">
+          <input name="convertedRadio" class="form-check-input" type="radio" value="unconverted" id="convertedRadio2" <?php echo $vehicle['data']['converted'] === 'unconverted' ? 'checked' : '' ?>>
+          <label class="form-check-label" for="convertedRadio2">
+            Не переделано
+          </label>
+        </div>
+      </div>
+
+      <div id="convertedDiv">
+        <?php if($vehicle['data']['converted'] !== 'unconverted'): ?>
+          <div class="row g-2 mb-3">
+              <div class="mb-0">
+                  <label for="other" class="form-label">Во что был переделано ТС?</label>
+                  <textarea name="converted" id="converted" class="form-control" required><?php echo $vehicle['data']['converted'] ?></textarea>
+              </div>
+          </div>
+        <?php endif ?>
+      </div>
+
+      <div class="row g-2 mb-3">
+        <div class="mb-0">
+          <label for="drivenBy" class="form-label">Управляется водителем <br><span class="text-danger">(Примечание: Пожалуйста, введите [номер водителя], если вы еще не назначили водителя для этого транспортного средства.)</span></label>
+          <?php if($vehicle['data']['driverFullName']): ?>
+              <br /> <span class="mb-3">Имя водителя:  <strong><?php echo $vehicle['data']['driverFullName'] ?></strong></span>
+            <?php endif ?>
+          <input type="text" name="drivenBy" value="<?php echo $vehicle['data']['driverIdNo'] ? $vehicle['data']['driverIdNo'] : 'Нет водителя';?>" id="drivenBy" class="form-control" placeholder="">
+        </div>
+      </div>
+
+      <div class="row g-2 mb-3">
+        <div class="mb-0">
+          <label for="other" class="form-label">Другая информация о транспортном средстве <br><span class="text-danger">(Примечание: Пожалуйста, введите [-], если нет другой информации.)</span></label></label>
+          <textarea name="other" id="other" class="form-control"><?php echo $vehicle['data']['other'];?></textarea>
+        </div>
+      </div>
+
+      
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Обновить ТС</button>
+      </div>
+    </div>
+
+      
+    </div>
+  </div>
+</div>
+</form>
+
+            
+          </div>
+          <!-- / Content -->
+
+          
+          
+
+<!-- Footer -->
+<?php include  $_SERVER['DOCUMENT_ROOT'].'/views/components/footer.phtml'; ?>
+<!-- / Footer -->
+
+          
+          <div class="content-backdrop fade"></div>
+        </div>
+        <!-- Content wrapper -->
+      </div>
+      <!-- / Layout page -->
+    </div>
+
+    
+    
+    <!-- Overlay -->
+    <div class="layout-overlay layout-menu-toggle"></div>
+    
+    
+  </div>
+  <!-- / Layout wrapper -->
+
+  
+
+  <!-- Core JS -->
+  <!-- build:js assets/vendor/js/core.js -->
+  <script src="/views/assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="/views/assets/vendor/libs/popper/popper.js"></script>
+  <script src="/views/assets/vendor/js/bootstrap.js"></script>
+  <script src="/views/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  
+  <script src="/views/assets/vendor/js/menu.js"></script>
+  <script src="/views/api//vehicle.API.js"></script>
+  <!-- endbuild -->
+
+  <!-- Vendors JS -->
+  
+  
+
+  <!-- Main JS -->
+  <script src="/views/assets/js/main.js"></script>
+
+  <!-- Page JS -->
+  <script src="/views/assets/js/pages-account-settings-account.js"></script>
+  
+  
+</body>
+</html>

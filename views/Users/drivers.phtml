@@ -1,0 +1,905 @@
+<?php  
+if(isset($_SESSION['userRole']) && $_SESSION['userRole'] !== 'superAdmin' && $_SESSION['userRole'] !== 'admin'):
+  include  $_SERVER['DOCUMENT_ROOT'].'/views/404.php';
+  return;
+endif;
+ include  $_SERVER['DOCUMENT_ROOT'].'/views/components/header.phtml'; ?>
+<style>
+    input:focus:required:invalid {border: 1px solid red;}
+    input:required:valid { border: 1px solid #d9dee3; }
+    select:focus:required:invalid {border: 1px solid red;}
+    select:required:valid { border: 1px solid #d9dee3; }
+    textarea:focus:required:invalid {border: 1px solid red;}
+    textarea:required:valid { border: 1px solid #d9dee3; }
+</style>
+      <!-- Content wrapper -->
+      <div class="content-wrapper">
+        <!-- Content -->
+          <div class="container-xxl flex-grow-1 container-p-y">
+            
+                  
+          <h4 class="fw-bold py-3 mb-4">
+            <span class="text-muted fw-light">Персонал /</span> Водители
+          </h4>
+
+          <!-- Basic Bootstrap Table -->
+          <div class="card">
+            <div class="flexDiv">
+              <h5 class="card-header">Все водители</h5>
+              <!-- Button trigger modal -->
+              <form id="searchDriverForm" autocomplete="off">
+                <div class="d-flex g-3">
+                    <input name="searchDriver" class="form-control form-control-sm me-2" type="search" placeholder="Начните вводить данные">
+                    <button type="submit" disabled="true" id="searchDriverBtn" class="btn btn-primary btn-sm">Поиск</button>
+                </div>
+              </form>
+              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalScrollable">
+                Добавить Водителя
+              </button>
+            </div>
+            <div class="p-3" id="successDiv"></div>
+            <div class="table-responsive text-nowrap">
+            <table class="table">
+                <thead>
+                  <tr>
+                    <th>Имя</th>
+                    <th>Номер водителя</th>
+                    <th>Мейл</th>
+                    <th>Техника в пользовании</th>
+                    <th>Рег. номер техники</th>
+                    <th>Действия:</th>
+                  </tr>
+                </thead>
+                <tbody class="table-border-bottom-0"></tbody>
+              </table>
+              
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col">
+                  <div class="demo-inline-spacing">
+                    <!-- Basic Pagination -->
+                    <nav aria-label="Page navigation">
+                      <ul class="pagination">
+                       
+                      </ul>
+                    </nav>
+                    <!--/ Basic Pagination -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--/ Basic Bootstrap Table -->
+          <div class="modal fade" id="modalScrollable2" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="modalScrollableTitle">Карточка водителя</h5><br />
+                </div>
+                  <span class="ms-4 me-4" id="genPass"></span>
+                <div class="modal-body" id="detailsBody">
+                  <div class="text-center fs-3">
+                    <i class='bx bx-loader-alt bx-spin fs-1'></i>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-outline-secondary" id="closeDetails" data-bs-dismiss="modal">Закрыть</button>
+                  <span id="genPassBtnDiv"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr class="my-5">
+                    
+      </div>
+<!-- / Content -->
+ <!-- Default Modal -->
+ <div class="col-lg-8 col-md-8">
+  <div class="modal fade " id="modalScrollable" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog  modal-lg modal-dialog-scrollable" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalScrollableTitle">Новый водитель</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+          <p style="margin-left: 30px" class="p-2" id="pError"></p>
+        <div class="modal-body">
+      <form autocomplete="off" id="addDriver">
+          <div class="card-body">
+            <div class="d-flex align-items-start align-items-sm-center gap-4">
+              <img src="" alt="user-avatar" class="d-block rounded" height="100" width="100" id="uploadedAvatar" />
+              <div class="button-wrapper">
+                <label for="upload" class="btn btn-primary me-2 mb-4" tabindex="0">
+                  <span class="d-none d-sm-block">Загрузите фото водителя</span>
+                  <i class="bx bx-upload d-block d-sm-none"></i>
+                  <input type="file" name="driverPhoto" id="upload" class="account-file-input" hidden accept="image/png, image/jpeg" />
+                </label>
+                <button type="button" class="btn btn-outline-secondary account-image-reset mb-4"  id="resetPhoto">
+                  <i class="bx bx-reset d-block d-sm-none"></i>
+                  <span class="d-none d-sm-block">Сброс</span>
+                </button>
+    
+                <p class="text-muted mb-0">Допустимы JPG, GIF, PNG. Максимальный размер 800K</p>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col mb-3" id="inputParent">
+              <label for="nameBasic" class="form-label">Имя</label>
+              <input type="text" id="nameBasic" name="driverName" class="form-control" placeholder="Enter Name" required>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col mb-3" id="inputParent">
+              <label for="dob" class="form-label">Дата рождения</label>
+              <input type="date" name="dob" id="dob" class="form-control" placeholder="Driver's Date of Birth" required>
+            </div>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col mb-0" id="inputParent">
+              <label for="phone-h" class="form-label">Телефон (Домашний)</label>
+              <input type="number" name="phoneOne" id="phone-h" class="form-control" placeholder="xxxxxxxxxx" required>
+            </div>
+            <div class="col mb-0" id="inputParent">
+              <label for="phone-m" class="form-label">Телефон (Мобильный)</label>
+              <input type="number" name="phoneTwo" id="phone-m" class="form-control" placeholder="xxxxxxxxxx" required>
+            </div>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col mb-0" id="inputParent">
+              <label for="id-number" class="form-label">СерияНомер водит. удост.</label>
+              <input type="text" name="idNumber" id="id-number" class="form-control" placeholder="xxxxxxxxxx" required>
+            </div>
+            <div class="col mb-0" id="inputParent">
+              <label for="email" class="form-label">Мейл</label>
+              <input type="email" name="driverEmail" id="email" class="form-control" placeholder="xxx@xxxx.xxx" required>
+            </div>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6 mb-0" id="inputParent">
+              <label for="curAddress" class="form-label">Текущий адрес</label>
+              <input type="text" name="curAddress" id="curAddress" class="form-control" required>
+            </div>
+            <div class="col-3 mb-0" id="inputParent">
+              <label for="curFrom" class="form-label">От</label>
+              <input type="number" name="curFrom" id="curFrom" placeholder="yyyy" class="form-control" required>
+            </div>
+            <div class="col-3 mb-0">
+              <label for="curTo" class="form-label">До</label>
+              <input type="text" name="curTo" id="curTo" readonly class="form-control" value="Present">
+            </div>
+          </div>
+
+          <div class="col-md mb-3">
+            <small class=" fw-semibold">Предыдущие адреса водителя?</small>
+            <div class="form-check mt-3">
+              <input name="address-radio" class="form-check-input" type="radio" value="yes" id="defaultRadio1">
+              <label class="form-check-label" for="defaultRadio1">
+                Да
+              </label>
+            </div>
+            <div class="form-check">
+              <input name="address-radio" class="form-check-input" type="radio" value="no" id="defaultRadio2" checked="">
+              <label class="form-check-label" for="defaultRadio2">
+                Нет
+              </label>
+            </div>
+          </div>
+
+          <div id="prevAddressDiv"></div>
+
+          <div class="col-md mb-1">
+            <p class=" fw-semibold">В случае ЧП связаться с:</p>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col mb-0" id="inputParent">
+              <label for="notify-name" class="form-label"> Имя</label>
+              <input type="text" name="notifyName" id="notify-name" class="form-control" placeholder="Enter Name" required>
+            </div>
+            <div class="col mb-0" id="inputParent">
+              <label for="notify-num" class="form-label">Контактный номер</label>
+              <input type="number" name="nContact" id="email" class="form-control" placeholder="xxxxxxxxxx" required>
+            </div>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col mb-0"  id="selectParent">
+              <label for="selectA" class="form-label">На какую должность?</label>
+              <select id="selectA" name="position" class="form-select" required>
+                <option value="">выберите</option>
+                <option value="Taxi">Такси</option>
+                <option value="Hiring">HR</option>
+                <option value="School-pickup">Самосвал</option>
+                <option value="Van-driver">Автобус</option>
+              </select>
+            </div>
+            <div class="col mb-0" id="inputParent">
+              <label for="salary" class="form-label">Ожидаемая ЗП (в мес.)</label>
+              <input type="number" name="salary" id="salary" class="form-control" placeholder="xxx" required>
+            </div>
+          </div>
+
+          <div class="col-md mb-3">
+            <p class=" fw-semibold">Работали ли вы раньше в этой компании?</p>
+            <div class="form-check mt-3">
+              <input name="worked-radio" class="form-check-input" type="radio" value="yes" id="workedRadio1">
+              <label class="form-check-label" for="workedRadio1">
+                Да
+              </label>
+            </div>
+            <div class="form-check">
+              <input name="worked-radio" class="form-check-input" type="radio" value="no" id="workedRadio2" checked="">
+              <label class="form-check-label" for="workedRadio2">
+                Нет
+              </label>
+            </div>
+          </div>
+
+          <div id="workedDiv"></div>
+
+          <div class="col-md mb-3">
+            <p class=" fw-semibold">Трудоустроены на данный момент?</p>
+            <div class="form-check mt-3">
+              <input name="employed-radio" class="form-check-input" type="radio" value="yes" id="employedRadio1">
+              <label class="form-check-label" for="employedRadio1">
+                Да
+              </label>
+            </div>
+            <div class="form-check">
+              <input name="employed-radio" class="form-check-input" type="radio" value="no" id="employedRadio2" checked="">
+              <label class="form-check-label" for="employedRadio2">
+                Нет
+              </label>
+            </div>
+          </div>
+
+          <div id="employedDiv"></div>
+
+          <div class="col-md mb-3">
+            <p class=" fw-semibold">Не лишены ли вы возможности законно работать водителем по профессии?</p>
+            <div class="form-check mt-3">
+              <input name="prevented-radio" class="form-check-input" type="radio" value="yes" id="preventedRadio1">
+              <label class="form-check-label" for="preventedRadio1">
+                Да
+              </label>
+            </div>
+            <div class="form-check">
+              <input name="prevented-radio" class="form-check-input" type="radio" value="no" id="preventedRadio2" checked="">
+              <label class="form-check-label" for="preventedRadio2">
+                Нет
+              </label>
+            </div>
+          </div>
+
+          <div class="col-md mb-3">
+            <p class=" fw-semibold">Были ли вы когда-либо осуждены за тяжкое преступление, мелкий проступок или уголовное правонарушение? </p>
+            <div class="form-check mt-3">
+              <input name="convicted-radio" class="form-check-input" type="radio" value="yes" id="convictedRadio1">
+              <label class="form-check-label" for="convictedRadio1">
+                Да
+              </label>
+            </div>
+            <div class="form-check">
+              <input name="convicted-radio" class="form-check-input" type="radio" value="no" id="convictedRadio2" checked="">
+              <label class="form-check-label" for="convictedRadio2">
+                Нет
+              </label>
+            </div>
+          </div>
+
+          <div class="col-md mb-3">
+            <hr  />
+            <h4 class=" fw-semibold mb-2">Информация о водительских правах</h4>
+            <div class="col mb-3" id="inputParent">
+              <label for="licenseNo" class="form-label">СЕРИЯ, НОМЕР</label>
+              <input name="lNumber" type="text" id="licenseNo" class="form-control" placeholder="Enter License No." required>
+            </div>
+            <div class="col mb-3" id="inputParent">
+              <label for="licenseCity" class="form-label">ГОРОД</label>
+              <input name="lCity" type="text" id="licenseCity" class="form-control" placeholder="Enter City/ Town" required>
+            </div>
+            <div class="row g-2 mb-3" id="inputParent">
+              <div class="col mb-0" id="inputParent">
+                <label for="licenseExp" class="form-label"> ДАТА ОКОНЧАНИЯ ДЕЙСТВИЯ</label>
+                <input name="lExpDate" type="date" id="licenseExp" class="form-control" required>
+              </div>
+              <div class="col mb-0" id="inputParent">
+                <label for="licenseType" class="form-label">КАТЕГОРИЯ</label>
+                <input name="lType" type="text" id="licenseType" placeholder="Enter License Type" class="form-control" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md mb-3">
+            <hr />
+            <h4 class=" fw-semibold mb-1">ОБРАЗОВАНИЕ</h4>
+            <div class="row g-2 mb-3">
+              <div class="col mb-0" id="inputParent">
+                <label for="highestEdu" class="form-label"> Какое у вас образование?</label>
+                <input name="hEdu" type="text" id="highestEdu" class="form-control" required>
+              </div>
+              <div class="col mb-0" id="inputParent">
+                <label for="eduCompleted" class="form-label">Законченное</label>
+                <input name="compOn" type="number" id="eduCompleted" placeholder="yyyy" class="form-control" required>
+              </div>
+            </div>
+            <div class="col-md mb-3">
+              <p class=" fw-semibold">Имеете ли вы полное представление о правилах безопасности автотранспорта?  </p>
+              <div class="form-check mt-0">
+                <input name="carreer-radio" class="form-check-input" type="radio" value="yes" id="carreerRadio1">
+                <label class="form-check-label" for="carreerRadio1">
+                  Да
+                </label>
+              </div>
+              <div class="form-check">
+                <input name="carreer-radio" class="form-check-input" type="radio" value="no" id="carreerRadio2" checked="">
+                <label class="form-check-label" for="carreerRadio2">
+                  Нет
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md mb-3">
+            <hr />
+            <h4 class=" fw-semibold mb-1">ОПЫТ ВОЖДЕНИЯ</h4>
+            <div class="col-md mb-3">
+              <p class=" fw-semibold">Трактор  </p>
+              <div class="form-check mt-0">
+                <input name="tractor-radio" class="form-check-input" type="radio" value="yes" id="tractorRadio1">
+                <label class="form-check-label" for="tractorRadio1">
+                  Да
+                </label>
+              </div>
+              <div class="form-check">
+                <input name="tractor-radio" class="form-check-input" type="radio" value="no" id="tractorRadio2" checked="">
+                <label class="form-check-label" for="tractorRadio2">
+                  Нет
+                </label>
+              </div>
+            </div>
+
+            <div id="tractorDiv"></div>
+            
+            <div class="col-md mb-3">
+              <p class=" fw-semibold">Грузовик</p>
+              <div class="form-check mt-0">
+                <input name="truck-radio" class="form-check-input" type="radio" value="yes" id="truckRadio1">
+                <label class="form-check-label" for="truckRadio1">
+                  Да
+                </label>
+              </div>
+              <div class="form-check">
+                <input name="truck-radio" class="form-check-input" type="radio" value="no" id="truckRadio2" checked="">
+                <label class="form-check-label" for="truckRadio2">
+                  Нет
+                </label>
+              </div>
+            </div>
+            
+            <div id="truckDiv"></div>
+
+            <div class="col-md mb-3">
+              <p class=" fw-semibold">Тягач  </p>
+              <div class="form-check mt-0">
+                <input name="trailer-radio" class="form-check-input" type="radio" value="yes" id="trailerRadio1">
+                <label class="form-check-label" for="trailerRadio1">
+                  Да
+                </label>
+              </div>
+              <div class="form-check">
+                <input name="trailer-radio" class="form-check-input" type="radio" value="no" id="trailerRadio2" checked="">
+                <label class="form-check-label" for="trailerRadio2">
+                  Нет
+                </label>
+              </div>
+            </div>
+            
+            <div id="trailerDiv"></div>
+
+            <div class="col-md mb-3">
+              <p class=" fw-semibold">Автобус  </p>
+              <div class="form-check mt-0">
+                <input name="bus-radio" class="form-check-input" type="radio" value="yes" id="busRadio1">
+                <label class="form-check-label" for="busRadio1">
+                  Да
+                </label>
+              </div>
+              <div class="form-check">
+                <input name="bus-radio" class="form-check-input" type="radio" value="no" id="busRadio2" checked="">
+                <label class="form-check-label" for="busRadio2">
+                  Нет
+                </label>
+              </div>
+            </div>
+            
+            <div id="busDiv"></div>
+
+            <div class="col-md mb-3">
+              <p class=" fw-semibold">Вэн  </p>
+              <div class="form-check mt-0">
+                <input name="van-radio" class="form-check-input" type="radio" value="yes" id="vanRadio1">
+                <label class="form-check-label" for="vanRadio1">
+                  Да
+                </label>
+              </div>
+              <div class="form-check">
+                <input name="van-radio" class="form-check-input" type="radio" value="no" id="vanRadio2" checked="">
+                <label class="form-check-label" for="vanRadio2">
+                  Нет
+                </label>
+              </div>
+            </div>
+            
+            <div id="vanDiv"></div>
+
+            <div class="col-md mb-3">
+              <p class=" fw-semibold">Такси</p>
+              <div class="form-check mt-0">
+                <input name="taxi-radio" class="form-check-input" type="radio" value="yes" id="taxiRadio1">
+                <label class="form-check-label" for="taxiRadio1">
+                  Да
+                </label>
+              </div>
+              <div class="form-check">
+                <input name="taxi-radio" class="form-check-input" type="radio" value="no" id="taxiRadio2" checked="">
+                <label class="form-check-label" for="taxiRadio2">
+                  Нет
+                </label>
+              </div>
+            </div>
+            
+            <div id="taxiDiv"></div>
+
+            <div class="col-md mb-3">
+              <hr />
+              <h4 class=" fw-semibold mb-1">История аварий за последние 3 года</h4>
+              <div class="col-md mb-3">
+                <p class=" fw-semibold mt-2">Есть ли аварии за последние 3 года?  </p>
+                <div class="form-check mt-0">
+                  <input name="accident-radio" class="form-check-input" type="radio" value="yes" id="accidentRadio1">
+                  <label class="form-check-label" for="accidentRadio1">
+                    Да
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input name="accident-radio" class="form-check-input" type="radio" value="no" id="accidentRadio2" checked="">
+                  <label class="form-check-label" for="accidentRadio2">
+                    Нет
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div id="accidentDiv"></div>
+
+            <div class="col-md mb-3">
+              <hr />
+              <h4 class=" fw-semibold mb-1">проблемы с нарушениями ПДД за последние 3 года, не связанные с парковкой</h4>
+              <div class="col-md mb-3">
+                <p class=" fw-semibold mt-2">Были ли они?  </p>
+                <div class="form-check mt-0">
+                  <input name="traffic-radio" class="form-check-input" type="radio" value="yes" id="trafficRadio1">
+                  <label class="form-check-label" for="trafficRadio1">
+                    Да
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input name="traffic-radio" class="form-check-input" type="radio" value="no" id="trafficRadio2" checked="">
+                  <label class="form-check-label" for="trafficRadio2">
+                    Нет
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div id="trafficDiv"></div>
+
+
+          </div>
+          
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="canDriverBtn" class="btn btn-outline-secondary" data-bs-dismiss="modal">Закрыть</button>
+          <button type="submit" id="addDriverBtn" class="btn btn-primary">Сохранить изменения</button>
+        </div>
+      </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<!-- Footer -->
+  <?php include  $_SERVER['DOCUMENT_ROOT'].'/views/components/footer.phtml'; ?>
+<!-- / Footer -->
+
+          
+      <div class="content-backdrop fade"></div>
+    </div>
+    <!-- Content wrapper -->
+  </div>
+  <!-- / Layout page -->
+</div>
+
+    
+    
+    <!-- Overlay -->
+    <div class="layout-overlay layout-menu-toggle"></div>
+    
+    
+  </div>
+  <!-- / Layout wrapper -->
+  <script src="/views/api/drivers.API.js"></script>
+  <script>
+    const prevAddressDiv = document.getElementById('prevAddressDiv');
+    const workedDiv = document.getElementById('workedDiv');
+    const employedDiv = document.getElementById('employedDiv');
+    const truckDiv = document.getElementById('truckDiv');
+    const tractorDiv = document.getElementById('tractorDiv');
+    const trailerDiv = document.getElementById('trailerDiv');
+    const busDiv = document.getElementById('busDiv');
+    const vanDiv = document.getElementById('vanDiv');
+    const taxiDiv = document.getElementById('taxiDiv');
+    const accidentDiv = document.getElementById('accidentDiv');
+    const trafficDiv = document.getElementById('trafficDiv');
+
+
+    const addressRadio = document.querySelectorAll('[name="address-radio"]');
+    const workedRadio = document.querySelectorAll('[name="worked-radio"]');
+    const employedRadio = document.querySelectorAll('[name="employed-radio"]');
+    const truckRadio = document.querySelectorAll('[name="truck-radio"]');
+    const tractorRadio = document.querySelectorAll('[name="tractor-radio"]');
+    const trailerRadio = document.querySelectorAll('[name="trailer-radio"]');
+    const busRadio = document.querySelectorAll('[name="bus-radio"]');
+    const vanRadio = document.querySelectorAll('[name="van-radio"]');
+    const taxiRadio = document.querySelectorAll('[name="taxi-radio"]');
+    const accidentRadio = document.querySelectorAll('[name="accident-radio"]');
+    const trafficRadio = document.querySelectorAll('[name="traffic-radio"]');
+
+
+    for (let i = 0; i < addressRadio.length; i++) {
+     addressRadio[i].addEventListener('change', (e) => {
+        if(e.target.value === 'yes'){
+          prevAddressDiv.innerHTML = `
+          <div class="row g-2 mb-3">
+            <div class="col-6 mb-0" id="inputParent">
+              <label for="prevOne" class="form-label">Предыдущий адрес 1</label>
+              <input name="prevOne" type="text" id="prevOne" class="form-control" required>
+            </div>
+            <div class="col-3 mb-0" id="inputParent">
+              <label for="prevFrom" class="form-label">С</label>
+              <input name="prevFrom1" type="number" id="prevFrom1" class="form-control" placeholder="yyyy" required>
+            </div>
+            <div class="col-3 mb-0" id="inputParent">
+              <label for="prevTo" class="form-label">По</label>
+              <input name="prevTo1" type="number" id="prevTo1" class="form-control" placeholder="yyyy" required>
+            </div>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-6 mb-0" id="inputParent">
+              <label for="prevTwo" class="form-label">Предыдущий адрес 2</label>
+              <input name="prevTwo" type="text" id="prevTwo" class="form-control" required>
+            </div>
+            <div class="col-3 mb-0" id="inputParent">
+              <label for="prevFrom2" class="form-label">С</label>
+              <input name="prevFrom2" type="number" id="prevFrom2" class="form-control" placeholder="yyyy" required>
+            </div>
+            <div class="col-3 mb-0" id="inputParent">
+              <label for="prevTo2" class="form-label">По</label>
+              <input name="prevTo2" type="number" id="prevTo2" class="form-control" placeholder="yyyy" required>
+            </div>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-6 mb-0" id="inputParent">
+              <label for="prevThree" class="form-label">Предыдущий адрес 3</label>
+              <input name="prevThree" type="text" id="prevThree" class="form-control" required>
+            </div>
+            <div class="col-3 mb-0" id="inputParent">
+              <label for="prevFrom3" class="form-label">С</label>
+              <input name="prevFrom3" type="number" id="prevFrom3" class="form-control" placeholder="yyyy" required>
+            </div>
+            <div class="col-3 mb-0" id="inputParent">
+              <label for="prevTo3" class="form-label">По</label>
+              <input name="prevTo3" type="number" id="prevTo3" class="form-control" placeholder="yyyy" required>
+            </div>
+          </div>
+          `;
+        }else{
+          prevAddressDiv.innerHTML = '';
+        }
+     });
+      
+    }
+
+    for (let i = 0; i < employedRadio.length; i++) {
+      employedRadio[i].addEventListener('change', (e) => {
+        if(e.target.value === 'yes'){
+          employedDiv.innerHTML = `
+          <div class="row g-2 mb-3">
+            <div class="col mb-0" id="inputParent">
+              <label for="availableOn" class="form-label">Когда вы будете доступны?</label>
+              <input name="availableOn" type="date" id="availableOn" class="form-control" required>
+            </div>
+          </div>
+          `;
+        }else{
+          employedDiv.innerHTML = '';
+        }
+     });
+      
+    }
+
+    for (let i = 0; i < workedRadio.length; i++) {
+      workedRadio[i].addEventListener('change', (e) => {
+        if(e.target.value === 'yes'){
+          workedDiv.innerHTML = `
+          <div class="row g-2 mb-3">
+            <div class="col mb-0" id="inputParent">
+              <label for="prevFromWorked" class="form-label">С</label>
+              <input name="prevFromWorked" type="number" id="prevFromWorked" class="form-control" placeholder="yyyy" required>
+            </div>
+            <div class="col mb-0" id="inputParent">
+              <label for="prevToWorked" class="form-label">По</label>
+              <input name="prevToWorked" type="number" id="prevToWorked" class="form-control" placeholder="yyyy" required>
+            </div>
+          </div>
+          `;
+        }else{
+          workedDiv.innerHTML = '';
+        }
+     });
+      
+    }
+    
+
+    for (let i = 0; i < truckRadio.length; i++) {
+      truckRadio[i].addEventListener('change', (e) => {
+        if(e.target.value === 'yes'){
+          truckDiv.innerHTML = `
+          <div class="row g-2 mb-3">
+            <div class="col mb-0">
+              <label for="truckEquipType" class="form-label">Тип экипировки </label>
+              <input name="truckEquipType" type="text" id="truckEquipType" class="form-control" required>
+            </div>
+            <div class="col mb-0">
+              <label for="truckYears" class="form-label">Число лет</label>
+              <input name="truckYears" type="number" id="truckYears" class="form-control" required>
+            </div>
+            <div class=" mb-0">
+              <label for="truckStates" class="form-label">Регионы, в которых вы передвигались как водитель</label>
+              <input name="truckStates" type="text" id="truckStates" class="form-control" required>
+            </div>
+          </div>
+          `;
+        }else{
+          truckDiv.innerHTML = '';
+        }
+     });
+      
+    }
+
+    for (let i = 0; i < trailerRadio.length; i++) {
+      trailerRadio[i].addEventListener('change', (e) => {
+        if(e.target.value === 'yes'){
+          trailerDiv.innerHTML = `
+          <div class="row g-2 mb-3">
+            <div class="col mb-0">
+              <label for="trailerEquipType" class="form-label">Тип экипировки </label>
+              <input name="trailerEquipType" type="text" id="trailerEquipType" class="form-control" required>
+            </div>
+            <div class="col mb-0">
+              <label for="trailerYears" class="form-label">Число лет</label>
+              <input name="trailerYears" type="number" id="trailerYears" class="form-control" required>
+            </div>
+            <div class=" mb-0">
+              <label for="trailerStates" class="form-label">Регионы, в которых вы передвигались как водитель</label>
+              <input name="trailerStates" type="text" id="trailerStates" class="form-control" required>
+            </div>
+          </div>
+          `;
+        }else{
+          trailerDiv.innerHTML = '';
+        }
+     });
+      
+    }
+
+    for (let i = 0; i < tractorRadio.length; i++) {
+      tractorRadio[i].addEventListener('change', (e) => {
+        if(e.target.value === 'yes'){
+          tractorDiv.innerHTML = `
+          <div class="row g-2 mb-3">
+            <div class="col mb-0">
+              <label for="tractorEquipType" class="form-label">Тип экипировки </label>
+              <input name="tractorEquipType" type="text" id="tractorEquipType" class="form-control" required>
+            </div>
+            <div class="col mb-0">
+              <label for="tractorYears" class="form-label">Число лет</label>
+              <input name="tractorYears" type="number" id="tractorYears" class="form-control" required>
+            </div>
+            <div class=" mb-0">
+              <label for="tractorStates" class="form-label">Регионы, в которых вы передвигались как водитель</label>
+              <input name="tractorStates" type="text" id="tractorStates" class="form-control" required>
+            </div>
+          </div>
+          `;
+        }else{
+          tractorDiv.innerHTML = '';
+        }
+     });
+      
+    }
+
+    for (let i = 0; i < busRadio.length; i++) {
+      busRadio[i].addEventListener('change', (e) => {
+        if(e.target.value === 'yes'){
+          busDiv.innerHTML = `
+          <div class="row g-2 mb-3">
+            <div class="col mb-0">
+              <label for="busEquipType" class="form-label">Тип экипировки </label>
+              <input name="busEquipType" type="text" id="busEquipType" class="form-control" required>
+            </div>
+            <div class="col mb-0">
+              <label for="busYears" class="form-label">Число лет</label>
+              <input name="busYears" type="number" id="busYears" class="form-control" required>
+            </div>
+            <div class=" mb-0">
+              <label for="busStates" class="form-label">Регионы, в которых вы передвигались как водитель</label>
+              <input name="busStates" type="text" id="busStates" class="form-control" required>
+            </div>
+          </div>
+          `;
+        }else{
+          busDiv.innerHTML = '';
+        }
+     });
+      
+    }
+
+    for (let i = 0; i < vanRadio.length; i++) {
+      vanRadio[i].addEventListener('change', (e) => {
+        if(e.target.value === 'yes'){
+          vanDiv.innerHTML = `
+          <div class="row g-2 mb-3">
+            <div class="col mb-0">
+              <label for="vanEquipType" class="form-label">Тип экипировки </label>
+              <input name="vanEquipType" type="text" id="vanEquipType" class="form-control" required>
+            </div>
+            <div class="col mb-0">
+              <label for="vanYears" class="form-label">Число лет</label>
+              <input name="vanYears" type="number" id="vanYears" class="form-control" required>
+            </div>
+            <div class=" mb-0">
+              <label for="vanStates" class="form-label">Регионы, в которых вы передвигались как водитель</label>
+              <input name="vanStates" type="text" id="vanStates" class="form-control" required>
+            </div>
+          </div>
+          `;
+        }else{
+          vanDiv.innerHTML = '';
+        }
+     });
+      
+    }
+
+    for (let i = 0; i < taxiRadio.length; i++) {
+      taxiRadio[i].addEventListener('change', (e) => {
+        if(e.target.value === 'yes'){
+          taxiDiv.innerHTML = `
+          <div class="row g-2 mb-3">
+            <div class="col mb-0">
+              <label for="taxiEquipType" class="form-label">Тип экипировки </label>
+              <input name="taxiEquipType" type="text" id="taxiEquipType" class="form-control" required>
+            </div>
+            <div class="col mb-0">
+              <label for="taxiYears" class="form-label">Число лет</label>
+              <input name="taxiYears" type="taxiYears" id="noYears6" class="form-control" required>
+            </div>
+            <div class=" mb-0">
+              <label for="taxiStates" class="form-label">Регионы, в которых вы передвигались как водитель</label>
+              <input name="taxiStates" type="text" id="taxiStates" class="form-control" required>
+            </div>
+          </div>
+          `;
+        }else{
+          taxiDiv.innerHTML = '';
+        }
+     });
+      
+    }
+
+    for (let i = 0; i < accidentRadio.length; i++) {
+      accidentRadio[i].addEventListener('change', (e) => {
+        if(e.target.value === 'yes'){
+          accidentDiv.innerHTML = `
+          <div class="row g-2 mb-3">
+            <div class="mb-0">
+              <label for="dateAccidentNature" class="form-label">Дата происшествия</label>
+              <input name="dateAccidentNature" type="date" id="dateAccidentNature" class="form-control" required>
+            </div>
+            <div class="mb-0">
+              <label for="accidentNature" class="form-label">В чем заключался случай</label>
+              <input name="accidentNature" type="text" id="accidentNature" class="form-control" required>
+            </div>
+            <div class="col mb-0">
+              <label for="fatalities" class="form-label">Количество</label>
+              <input name="fatalities" type="number" id="fatalities" class="form-control" required>
+            </div>
+            <div class="col mb-0">
+              <label for="injuries" class="form-label">Количество травм</label>
+              <input name="injuries" type="number" id="injuries" class="form-control" required>
+            </div>
+          </div>
+          `;
+        }else{
+          accidentDiv.innerHTML = '';
+        }
+     });
+      
+    }
+
+    for (let i = 0; i < trafficRadio.length; i++) {
+      trafficRadio[i].addEventListener('change', (e) => {
+        if(e.target.value === 'yes'){
+          trafficDiv.innerHTML = `
+          <div class="mb-0">
+            <label for="dateViolation" class="form-label">Дата нарушения/label>
+            <input name="dateViolation" type="date" id="dateViolation" class="form-control" required>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col mb-0">
+              <label for="violation" class="form-label">Нарушение</label>
+              <input name="violation" type="text" id="violation" class="form-control" required>
+            </div>
+            <div class="col mb-0">
+              <label for="state1" class="form-label">Регион</label>
+              <input name="state1" type="text" id="state1" class="form-control" required>
+            </div>
+            <div class=" mb-0">
+              <label for="penalty" class="form-label">Итог?</label>
+              <input name="penalty" type="text" id="penalty" class="form-control" required>
+            </div>
+          </div>
+          `;
+        }else{
+          trafficDiv.innerHTML = '';
+        }
+     });
+      
+    }
+  </script>
+  <!-- Core JS -->
+  <!-- build:js assets/vendor/js/core.js -->
+  <script src="/views/assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="/views/assets/vendor/libs/popper/popper.js"></script>
+  <script src="/views/assets/vendor/js/bootstrap.js"></script>
+  <script src="/views/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  
+  <script src="/views/assets/vendor/js/menu.js"></script>
+  <script src="/views/assets/js/pages-account-settings-account.js"></script>
+  <!-- endbuild -->
+
+  <!-- Vendors JS -->
+  
+  
+
+  <!-- Main JS -->
+  <script src="/views/assets/js/main.js"></script>
+
+  <!-- Page JS -->
+  
+  
+</body>
+
+
+<!-- Mirrored from demos.themeselection.com/sneat-bootstrap-html-admin-template-free/html/tables-basic.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 26 Dec 2022 09:09:32 GMT -->
+</html>

@@ -1,0 +1,147 @@
+<?php include  $_SERVER['DOCUMENT_ROOT'].'/views/components/header.phtml'; ?>
+      <!-- Content wrapper -->
+      <div class="content-wrapper">
+        <!-- Content -->
+          <div class="container-xxl flex-grow-1 container-p-y">
+            
+                  
+          <h4 class="fw-bold py-3 mb-4" id="allSalesPage">
+            <span class="text-muted fw-light">Доходы/</span> Все
+          </h4>
+
+          <!-- Basic Bootstrap Table -->
+          <div class="card">
+            <div class="flexDiv">
+              <h5 class="card-header">Все</h5>
+              <!-- Button trigger modal -->
+              <div>
+                <?php 
+                $months = array(
+                  'January',
+                  'February',
+                  'March',
+                  'April',
+                  'May',
+                  'June',
+                  'July ',
+                  'August',
+                  'September',
+                  'October',
+                  'November',
+                  'December',
+                );
+                ?>
+                <select id="smallSelect" class="form-select form-select-sm">
+                  <option value="<?php echo date('Y-m') ?>"><?php echo isset($_GET['filterDate']) ? 'Отфильтровать по месяцу' : $months[(int) explode('-', date('Y-m'))[1]-1] .', '.explode('-', date('Y-m'))[0] ?></option>
+                  <option value="all" <?php echo isset($_GET['filter']) && $_GET['filter'] === 'all'? 'selected' : ''; ?> >All Sales</option>
+                  <option value="today" <?php echo isset($_GET['filter']) && $_GET['filter'] === 'today' ? 'selected' : ''; ?>>Today's Sales</option>
+                  <?php
+                      foreach($getMonthsAndYears as $getMonthsAndYear){ ?>
+                        <option value="<?php echo $getMonthsAndYear ?>" <?php echo isset($_GET['filter']) && $_GET['filter'] === $getMonthsAndYear ? 'selected' : ''; ?> ><?php echo $months[(int) explode('-', $getMonthsAndYear)[1]-1] .', '.explode('-', $getMonthsAndYear)[0] ?></option>
+                      <?php } ?>
+                  ?>
+                </select>
+              </div>
+              <div>
+                  <input type="text" id="filterDateSelector" <?php echo isset($_GET['filterDate']) ? "value='{$_GET['filterDate']}'" : "" ?> placeholder="По дате" class="form-control">
+              </div>
+            </div>
+            <span class="ms-3" id="deleteErr"></span>
+            <div class="table-responsive text-nowrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Дата</th>
+                    <th>Водитель</th>
+                    <th>Сумма</th>
+                    <th>Кем произведена</th>
+                    <?php if($_SESSION['userRole'] === 'superAdmin' ||  $_SESSION['userRole'] === 'admin'): ?>
+                      <th>действия</th>
+                    <?php endif ?>
+                  </tr>
+                </thead>
+                <tbody class="table-border-bottom-0"></tbody>
+              </table>
+              
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col">
+                  <div class="demo-inline-spacing">
+                    <!-- Basic Pagination -->
+                    <nav aria-label="Page navigation">
+                      <ul class="pagination">
+                       
+                      </ul>
+                    </nav>
+                    <!--/ Basic Pagination -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--/ Basic Bootstrap Table -->
+
+          <hr class="my-5">
+                    
+      </div>
+      <script src="/views/api/sales.API.js?v=1"></script>
+<!-- / Content -->
+
+
+<!-- Footer -->
+  <?php include  $_SERVER['DOCUMENT_ROOT'].'/views/components/footer.phtml'; ?>
+<!-- / Footer -->
+
+
+<div class="content-backdrop fade"></div>
+</div>
+<!-- Content wrapper -->
+  </div>
+  <!-- / Layout page -->
+</div>
+
+
+
+<!-- Overlay -->
+    <div class="layout-overlay layout-menu-toggle"></div>
+    
+    
+  </div>
+  <!-- / Layout wrapper -->
+  
+  <!-- Core JS -->
+  <!-- build:js assets/vendor/js/core.js -->
+  <script src="/views/assets/js/datepicker.js"></script>
+  <script>
+  const allDates = <?php echo $getSalesDates ?>;
+    flatpickr("#filterDateSelector", {
+      altInput: true,
+      altFormat: 'F j, Y',
+      dateFormat: 'Y-m-d',
+      maxDate: 'today',
+      enable: allDates
+    });
+  </script>
+  <script src="/views/assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="/views/assets/vendor/libs/popper/popper.js"></script>
+  <script src="/views/assets/vendor/js/bootstrap.js"></script>
+  <script src="/views/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  
+  <script src="/views/assets/vendor/js/menu.js"></script>
+  <script src="/views/assets/js/pages-account-settings-account.js"></script>
+  <!-- endbuild -->
+
+  <!-- Vendors JS -->
+  
+  
+
+  <!-- Main JS -->
+  <script src="/views/assets/js/main.js"></script>
+
+  <!-- Page JS -->
+  
+</body>
+
+
+</html>

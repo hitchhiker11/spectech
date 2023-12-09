@@ -1,0 +1,360 @@
+<?php
+if(isset($_SESSION['userRole']) && $_SESSION['userRole'] !== 'superAdmin' && $_SESSION['userRole'] !== 'admin'):
+  include $_SERVER['DOCUMENT_ROOT'].'/views/404.php';
+  return;
+endif;
+include $_SERVER['DOCUMENT_ROOT'].'/views/components/header.phtml';
+?>
+<style>
+    input:focus:required:invalid {border: 1px solid red;}
+    input:required:valid { border: 1px solid #d9dee3; }
+    select:focus:required:invalid {border: 1px solid red;}
+    select:required:valid { border: 1px solid #d9dee3; }
+    textarea:focus:required:invalid {border: 1px solid red;}
+    textarea:required:valid { border: 1px solid #d9dee3; }
+</style>
+
+<!-- / Navbar -->
+
+<!-- Обертка контента -->
+<div class="content-wrapper">
+    <!-- Контент -->
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4">
+            <span class="text-muted fw-light">Пользователи /</span> Транспортные средства
+        </h4>
+
+        <!-- Основная таблица Bootstrap -->
+        <div class="card">
+            <div class="flexDiv">
+                <h5 class="card-header">Транспортные средства</h5>
+                <!-- Кнопка вызова модального окна -->
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalScrollable">
+                    Добавить ТС
+                </button>
+            </div>
+            <span class="ms-3" id="deleteErr"></span>
+            <div class="table-responsive text-nowrap">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Регистрационный номер</th>
+                            <th>Модель</th>
+                            <th>Номер двигателя</th>
+                            <th>Управляется</th>
+                            <th>Тип ТС</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-border-bottom-0"></tbody>
+                </table>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <div class="demo-inline-spacing">
+                            <!-- Простая навигация по страницам -->
+                            <nav aria-label="Навигация по страницам">
+                                <ul class="pagination"></ul>
+                            </nav>
+                            <!--/ Простая навигация по страницам -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--/ Основная таблица Bootstrap -->
+        <div class="modal fade" id="modalScrollable2" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalScrollableTitle">Информация о Транспортном средстве</h5>
+                    </div>
+                    <div class="modal-body" id="detailsBody">
+                        <div class="text-center fs-3">
+                            <i class='bx bx-loader-alt bx-spin fs-1'></i>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" id="closeDetails" data-bs-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr class="my-5">
+    </div>
+    <!-- / Контент -->
+
+    <!-- Модальное окно по умолчанию -->
+    <div class="col-lg-8 col-md-8">
+        <form id="vehicleForm">
+            <div class="modal fade " id="modalScrollable" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog  modal-lg modal-dialog-scrollable" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalScrollableTitle">Новое Транспортное средство</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                        </div>
+                        <form id="vehicleForm" autocomplete="off">
+                            <span class="ms-4 p-1" id="errDiv"></span>
+                            <div class="modal-body">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-start align-items-sm-center gap-4">
+                                        <img src="/uploads/vehicles/vehicle.png" alt="user-avatar" class="d-block rounded" height="100" width="100" id="uploadedAvatar" />
+                                        <div class="button-wrapper">
+                                            <label for="upload" class="btn btn-primary me-2 mb-4" tabindex="0">
+                                                <span class="d-none d-sm-block">Загрузить фото ТС</span>
+                                                <i class="bx bx-upload d-block d-sm-none"></i>
+                                                <input type="file" name="photo" id="upload" class="account-file-input" hidden accept="image/png, image/jpeg" />
+                                            </label>
+                                            <button type="button" class="btn btn-outline-secondary account-image-reset mb-4">
+                                                <i class="bx bx-reset d-block d-sm-none"></i>
+                                                <span class="d-none d-sm-block">Сбросить</span>
+                                            </button>
+                                            <p class="text-muted mb-0">Допустимые форматы: JPG, GIF или PNG. Максимальный размер 800K</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col mb-3">
+                                        <label for="model" class="form-label">Модель ТС</label>
+                                        <input name="model" type="text" id="model" class="form-control" placeholder="" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col mb-3">
+                                        <label for="color" class="form-label">Цвет ТС</label>
+                                        <input name="color" type="text" id="color" class="form-control" placeholder="" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col mb-3">
+                                        <label for="regisNo" class="form-label">Регистрационный номер</label>
+                                        <input name="regisNo" type="text" id="regisNo" class="form-control" placeholder="" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col mb-3">
+                                        <label for="type" class="form-label">Тип ТС</label>
+                                        <input type="text" name="type" id="type" class="form-control" placeholder="" required>
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col mb-0">
+                                        <label for="engine" class="form-label">Номер двигателя</label>
+                                        <input type="text" name="engine" id="engine" class="form-control" placeholder="" required>
+                                    </div>
+                                    <div class="col mb-0">
+                                        <label for="trans" class="form-label">Трансмиссия</label>
+                                        <input type="text" name="trans" id="trans" class="form-control" placeholder="" required>
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col mb-0">
+                                        <label for="axle" class="form-label">Ось</label>
+                                        <input type="text" name="axle" id="axle" class="form-control" placeholder="" required>
+                                    </div>
+                                    <div class="col mb-0">
+                                        <label for="paint" class="form-label">Краска</label>
+                                        <input type="text" name="paint" id="paint" class="form-control" placeholder="" required>
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col mb-0">
+                                        <label for="trim" class="form-label">Обивка</label>
+                                        <input type="text" name="trim" id="trim" class="form-control" placeholder="" required>
+                                    </div>
+                                    <div class="col mb-0">
+                                        <label for="chasis" class="form-label">Номер шасси</label>
+                                        <input type="text" name="chasis" id="chasis" class="form-control" placeholder="" required>
+                                    </div>
+                                </div>
+                                <div class="col-md mb-3">
+                                    <div class="form-check mt-3">
+                                        <input name="convertedRadio" class="form-check-input" type="radio" value="converted" id="convertedRadio1">
+                                        <label class="form-check-label" for="convertedRadio1">
+                                            Переоборудовано
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input name="convertedRadio" class="form-check-input" type="radio" value="unconverted" id="convertedRadio2" checked="">
+                                        <label class="form-check-label" for="convertedRadio2">
+                                            Не переоборудовано
+                                        </label>
+                                    </div>
+                                </div>
+                                <div id="convertedDiv"></div>
+                                <div class="row g-2 mb-3">
+                                    <div class="mb-0">
+                                        <label for="drivenBy" class="form-label">Будет управлять</label>
+                                        <input type="text" name="drivenBy" id="drivenBy" class="form-control" placeholder="">
+                                        <br>
+                                        <span class="text-danger">(Примечание: введите "[Без водителя]", если вы пока не назначаете водителя для этого ТС.)</span>
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="mb-0">
+                                        <label for="other" class="form-label">Дополнительная информация о ТС</label>
+                                        <textarea name="other" id="other" class="form-control"></textarea>
+                                        <br>
+                                        <span class="text-danger">(Примечание: введите "-", если нет дополнительной информации.)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Закрыть</button>
+                                <button type="submit" class="btn btn-primary">Добавить Транспортное средство</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="card mt-4"> <!-- mt-4 добавляет отступ сверху, если это необходимо -->
+    <div class="card-header">Информация о Технике</div>
+    <div class="card-body">
+        <!-- Ваш HTML-код -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.2/leaflet.css" />
+        <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.2/leaflet.js"></script>
+
+        <div id="map" style="width:100%; height:400px;"></div>
+        <div>
+            Select unit:<select id="units"><option></option></select>
+            <div id="log"></div>
+        </div>
+
+        <!-- Ваши JavaScript скрипты -->
+        <script type="text/javascript" src="//code.jquery.com/jquery-latest.min.js"></script>
+        <script type="text/javascript" src="//hst-api.wialon.com/wsdk/script/wialon.js"></script>
+        <script type="text/javascript">
+    var map, marker; // global variables
+
+    // Print message to log
+    function msg(text) { $("#log").prepend(text + "<br/>"); }
+
+    function init() { // Execute after login succeed
+        var sess = wialon.core.Session.getInstance(); // get instance of current Session
+        // specify what kind of data should be returned
+        var flags = wialon.item.Item.dataFlag.base | wialon.item.Unit.dataFlag.lastMessage;
+
+        sess.loadLibrary("itemIcon"); // load Icon Library 
+        sess.updateDataFlags( // load items to current session
+            [{type: "type", data: "avl_unit", flags: flags, mode: 0}], // Items specification
+            function (code) { // updateDataFlags callback
+                if (code) { msg(wialon.core.Errors.getErrorText(code)); return; } // exit if error code
+                
+                var units = sess.getItems("avl_unit"); // get loaded 'avl_resource's items
+                if (!units || !units.length){ msg("No units found"); return; } // check if units found
+                for (var i = 0; i< units.length; i++) // construct Select list using found resources
+                    $("#units").append("<option value='"+ units[i].getId() +"'>"+ units[i].getName()+ "</option>");
+                // bind action to select change event
+                $("#units").change( showUnit );
+        });
+    }
+
+    function showUnit() { // show selected unit on map
+    var val = $("#units").val(); // get selected unit id
+    if (!val) return; // exit if no unit selected
+    var unit = wialon.core.Session.getInstance().getItem(val); // get unit by id
+    console.log(unit); // Выводит весь объект unit в консоль
+
+    if (!unit) return; // exit if no unit
+    var pos = unit.getPosition(); // get unit position
+    if (!pos) return; // exit if no position
+
+    // print message with information about selected unit and its position
+    var speedText = pos.s !== undefined ? "<b>Speed</b>: " + pos.s + " km/h" : "<b>Speed</b>: N/A";
+    msg("<img src='" + unit.getIconUrl(32) + "'/> " + unit.getName() + " selected. Position " + pos.x + ", " + pos.y + "<br/>" + speedText);
+
+    if (map) { // check if map created
+        var icon = L.icon({
+            iconUrl: unit.getIconUrl(32)
+        });
+        if (!marker) {
+            marker = L.marker({lat: pos.y, lng: pos.x}, {icon: icon}).addTo(map);
+        } else {
+            marker.setLatLng({lat: pos.y, lng: pos.x});
+            marker.setIcon(icon);
+        }
+        map.setView({lat: pos.y, lng: pos.x});
+    }
+}
+
+
+    function initMap() {
+        // create a map in the "map" div, set the view to a given place and zoom
+        map = L.map('map').setView([53.9, 27.55], 10);
+
+        // add an OpenStreetMap tile layer
+        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://gurtam.com">Gurtam</a>'
+        }).addTo(map);
+    }
+
+    // execute when DOM ready
+    $(document).ready(function () {
+        wialon.core.Session.getInstance().initSession("https://hst-api.wialon.com"); // init session
+        wialon.core.Session.getInstance().loginToken("569a0920f1e58ba3eca2af8dfdd960102DFE6E5408AA4931F47B3616656DE99EBF31A5D3", "", // try to login
+            function (code) { // login callback
+                if (code){ msg(wialon.core.Errors.getErrorText(code)); return; }
+                msg("Logged successfully");
+                initMap();
+                init(); // when login suceed then run init() function
+        });
+    });
+</script>
+
+    </div>
+</div>
+<!-- Конец карточки для встроенного HTML-кода -->
+
+
+<!-- Footer -->
+<?php include  $_SERVER['DOCUMENT_ROOT'].'/views/components/footer.phtml'; ?>
+<!-- / Footer -->
+
+          
+      <div class="content-backdrop fade"></div>
+    </div>
+    <!-- Content wrapper -->
+  </div>
+  <!-- / Layout page -->
+</div>
+
+    
+    
+    <!-- Overlay -->
+    <div class="layout-overlay layout-menu-toggle"></div>
+    
+    
+  </div>
+
+  <!-- Core JS -->
+  <!-- build:js assets/vendor/js/core.js -->
+  <script src="/views/assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="/views/assets/vendor/libs/popper/popper.js"></script>
+  <script src="/views/assets/vendor/js/bootstrap.js"></script>
+  <script src="/views/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  
+  <script src="/views/assets/vendor/js/menu.js"></script>
+  <script src="/views/assets/js/pages-account-settings-account.js"></script>
+  <script src="/views/api/vehicle.API.js"></script>
+  <!-- endbuild -->
+
+  <!-- Vendors JS -->
+  
+  
+
+  <!-- Main JS -->
+  <script src="/views/assets/js/main.js"></script>
+
+  <!-- Page JS -->
+  
+</body>
+
+
+</html>
